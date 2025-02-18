@@ -35,10 +35,12 @@ function App() {
   const [userAnswers, setUserAnswers] = useState(Array(questions.length).fill(null));
   
   // Filter-Zustände: Für Parteien und Themen (alle per Default aktiv)
-  const [partyFilters, setPartyFilters] = useState({
-    "Partei A": true,
-    "Partei B": true,
-    "Partei C": true
+  const [partyFilters, setPartyFilters] = useState(() => {
+    const filters = {};
+    Object.keys(partyData).forEach(party => {
+      filters[party] = true;
+    });
+    return filters;
   });
   const [topicFilters, setTopicFilters] = useState(() => {
     const filters = {};
@@ -207,29 +209,32 @@ function App() {
                   dataKey="user"
                   stroke="#8884d8"
                   fill="#8884d8"
-                  fillOpacity={0.6}
+                  fillOpacity={0.7}
                 />
                 {Object.keys(partyData).map(party =>
-                  partyFilters[party] && (
+                  partyFilters?.[party] && (
                     <Radar
                       key={party}
                       name={party}
                       dataKey={party}
                       stroke={
-                        party === "Partei A"
-                          ? "#82ca9d"
-                          : party === "Partei B"
-                          ? "#FF8042"
+                        party === "Union"
+                          ? "#000000"
+                          : party === "AfD"
+                          ? "#0489DB"
+                          : party === "SPD"
+                          ? "#E3000F"
+                          : party === "Grüne"
+                          ? "#1AA037"
+                          : party === "Linke"
+                          ? "#E3000F"
+                          : party === "FDP"
+                          ? "#FFEF00"
+                          : party === "BSW"
+                          ? "#792351"
                           : "#00C49F"
                       }
-                      fill={
-                        party === "Partei A"
-                          ? "#82ca9d"
-                          : party === "Partei B"
-                          ? "#FF8042"
-                          : "#00C49F"
-                      }
-                      fillOpacity={0.6}
+                      fillOpacity={0}
                     />
                   )
                 )}
@@ -260,8 +265,32 @@ function App() {
           </section>
           
           <section className="share-section">
-            <button onClick={() => alert("Teilen-Funktion noch implementieren!")}>
-              Teilen
+            <button
+              onClick={() => {
+                const shareText = encodeURIComponent("Schau dir mein Wahlnetz an!");
+                const shareUrl = encodeURIComponent(window.location.href);
+                window.open(`https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`, "_blank");
+              }}
+            >
+              Auf Twitter teilen
+            </button>
+
+            <button
+              onClick={() => {
+                const shareUrl = encodeURIComponent(window.location.href);
+                window.open(`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`, "_blank");
+              }}
+            >
+              Auf Facebook teilen
+            </button>
+
+            <button
+              onClick={() => {
+                const shareText = encodeURIComponent("Schau dir mein Wahlnetz an: " + window.location.href);
+                window.open(`https://api.whatsapp.com/send?text=${shareText}`, "_blank");
+              }}
+            >
+              Über WhatsApp teilen
             </button>
           </section>
         </main>
