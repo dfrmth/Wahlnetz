@@ -1,0 +1,128 @@
+/* Grundlegende Styles, mobile-first */
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #fafafa;
+  }
+  
+  .container {
+    padding: 1rem;
+  }
+  
+  /* Header & Logo */
+  header {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+  
+  .logo-placeholder {
+    width: 100px;
+    height: 100px;
+    background-color: #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  }
+  
+  /* Willkommens- & Frage-Box */
+  .welcome-box, .question-box {
+    border: 1px solid #ddd;
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+    background-color: #fff;
+  }
+  
+  .arrow-button {
+    font-size: 2rem;
+    margin-top: 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .options {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 1rem 0;
+  }
+  
+  .option-button {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #888;
+    border-radius: 4px;
+    background-color: #f0f0f0;
+    cursor: pointer;
+  }
+  
+  /* Ergebnis-Seite */
+  .result-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .filter-panel {
+    border: 1px solid #ddd;
+    padding: 1rem;
+    border-radius: 8px;
+    background-color: #fff;
+  }
+  
+  .checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* Diagramm & Übersicht */
+  .chart-overview {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  
+  .chart-container {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .overview-table {
+    overflow-x: auto;
+  }
+  
+  .overview-table table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .overview-table th,
+  .overview-table td {
+    border: 1px solid #ddd;
+    padding: 0.5rem;
+    text-align: left;
+  }
+  
+  /* Teilen-Button */
+  .share-section {
+    text-align: center;
+  }
+  
+  /* Responsive ab 768px */
+  @media (min-width: 768px) {
+    .chart-overview {
+      flex-direction: row;
+    }
+    .chart-container,
+    .overview-table {
+      flex: 1;
+    }
+  }
+  
