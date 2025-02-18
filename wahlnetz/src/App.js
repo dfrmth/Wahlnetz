@@ -7,6 +7,7 @@ import {
   Tooltip,
   Legend
 } from 'recharts';
+import partyData from './data/parties.json';
 import './App.css';
 
 // Die Themenfragen, die nacheinander abgefragt werden
@@ -35,13 +36,9 @@ function App() {
   
   // Filter-Zustände: Für Parteien und Themen (alle per Default aktiv)
   const [partyFilters, setPartyFilters] = useState({
-    "Union": true,
-    "AfD": true,
-    "SPD": true,
-    "Grüne": true,
-    "Linke": true,
-    "FDP": true,
-    "BSW": true
+    "Partei A": true,
+    "Partei B": true,
+    "Partei C": true
   });
   const [topicFilters, setTopicFilters] = useState(() => {
     const filters = {};
