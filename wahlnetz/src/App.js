@@ -8,7 +8,32 @@ import {
   Legend
 } from 'recharts';
 import partyData from './data/parties.json';
+import html2canvas from "html2canvas";
 import './App.css';
+
+// Funktion zur Umwandlung von PNG zu JPG
+const convertToJpg = (pngBlob) => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const objectURL = URL.createObjectURL(pngBlob);
+    img.onload = () => {
+      // Canvas erstellen und das Bild darauf zeichnen
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+
+      // Das Bild als JPEG speichern und den Blob zurückgeben
+      canvas.toBlob((blob) => {
+        resolve(blob);
+      }, 'image/jpeg', 0.8); // Qualitätsstufe: 0.8 (kann angepasst werden)
+    };
+    img.onerror = reject;
+    img.src = objectURL;
+  });
+};
+
 
 // Die Themenfragen, die nacheinander abgefragt werden
 const questions = [
@@ -96,6 +121,95 @@ function App() {
     });
     return leaders.join(', ');
   };
+
+  const takeScreenshot = async () => {
+    const chartElement = document.querySelector(".chart-container"); // Dein Diagramm
+    if (!chartElement) return null;
+  
+    const canvas = await html2canvas(chartElement);
+    
+    return new Promise((resolve) => {
+      canvas.toBlob(async (blob) => {
+        if (!blob) return resolve(null); // Falls Blob fehlschlägt, abbrechen
+        const jpgBlob = await convertToJpg(blob); // PNG zu JPG konvertieren
+        console.log("Screenshot als JPG:", jpgBlob); // Debugging-Check
+        resolve(jpgBlob);
+      }, "image/png"); // Erst PNG speichern, dann umwandeln
+    });
+  };
+  
+
+  const uploadToCloudinary = async (imageBlob) => {
+    const formData = new FormData();
+    formData.append("file", imageBlob);
+    formData.append("upload_preset", "ml_default"); // Ersetze mit deinem Cloudinary-Preset
+    formData.append("cloud_name", "dsfgy9iqw"); // Ersetze mit deinem Cloudinary-Namen
+    formData.append("folder", "wahlspinne");
+    formData.append("public_id", "netzdiagramm_" + Date.now());
+    formData.append("resource_type", "image");
+  
+    try {
+      const response = await fetch(`https://api.cloudinary.com/v1_1/dsfgy9iqw/image/upload`, {
+        method: "POST",
+        body: formData,
+      });
+  
+      const data = await response.json();
+      if (!response.ok) {
+        console.error("Cloudinary-Fehler:", data.error.message);
+        throw new Error(data.error.message || "Unbekannter Fehler");
+      }
+  
+      return data.secure_url; // Gibt die URL des hochgeladenen Bildes zurück
+    } catch (error) {
+      console.error("Fehler beim Hochladen des Bildes:", error);
+      return null; // Fehler bei der Cloudinary-Antwort
+    }
+  };
+  
+  
+  const shareOnTwitter = async () => {
+    const imageBlob = await takeScreenshot();
+    if (!imageBlob) return alert("Screenshot fehlgeschlagen!");
+  
+    const imageUrl = await uploadToCloudinary(imageBlob);
+    if (!imageUrl) {
+      return alert("Bild konnte nicht hochgeladen werden.");
+    }
+  
+    // URL-Encoding für den Tweet-Text und das Bild
+    const tweetText = encodeURIComponent("Mein politisches Netzdiagramm! 🕸️ #WahlSpinne");
+    const encodedImageUrl = encodeURIComponent(imageUrl);
+  
+    // Twitter-App öffnen, falls installiert
+    const twitterAppUrl = `twitter://post?message=${tweetText}&attachment_url=${encodedImageUrl}`;
+    const webTwitterUrl = `https://twitter.com/intent/tweet?text=${tweetText}&url=${encodedImageUrl}`;
+  
+    window.location.href = twitterAppUrl;
+  
+    // Falls Twitter nicht installiert ist, öffne Twitter im Web
+    setTimeout(() => {
+      window.open(webTwitterUrl, "_blank");
+    }, 500);
+  };  
+
+  const shareOnInstagram = async () => {
+    const imageBlob = await takeScreenshot();
+    if (!imageBlob) return alert("Screenshot fehlgeschlagen!");
+  
+    const imageUrl = await uploadToCloudinary(imageBlob);
+  
+    // Instagram-App öffnen, falls installiert
+    const instagramStoryUrl = `instagram://story-camera?StickerImage=${encodeURIComponent(imageUrl)}`;
+  
+    window.location.href = instagramStoryUrl;
+  
+    // Falls Instagram nicht installiert ist, zeige Hinweis
+    setTimeout(() => {
+      alert("Bitte speichere das Bild und lade es manuell in deine Instagram-Story hoch.");
+    }, 500);
+  };
+  
 
   // Rendern der verschiedenen Phasen
   if (step === 'welcome') {
@@ -227,7 +341,7 @@ function App() {
                           : party === "Grüne"
                           ? "#1AA037"
                           : party === "Linke"
-                          ? "#E3000F"
+                          ? "#FF0046"
                           : party === "FDP"
                           ? "#FFEF00"
                           : party === "BSW"
@@ -265,34 +379,14 @@ function App() {
           </section>
           
           <section className="share-section">
-            <button
-              onClick={() => {
-                const shareText = encodeURIComponent("Schau dir mein Wahlnetz an!");
-                const shareUrl = encodeURIComponent(window.location.href);
-                window.open(`https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`, "_blank");
-              }}
-            >
-              Auf Twitter teilen
+            <button onClick={shareOnTwitter}>
+              <img src="twitter-logo.jpg" alt="Twitter" width="30" /> Tweeten
             </button>
-
-            <button
-              onClick={() => {
-                const shareUrl = encodeURIComponent(window.location.href);
-                window.open(`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`, "_blank");
-              }}
-            >
-              Auf Facebook teilen
-            </button>
-
-            <button
-              onClick={() => {
-                const shareText = encodeURIComponent("Schau dir mein Wahlnetz an: " + window.location.href);
-                window.open(`https://api.whatsapp.com/send?text=${shareText}`, "_blank");
-              }}
-            >
-              Über WhatsApp teilen
+            <button onClick={shareOnInstagram}>
+              <img src="instagram-logo.jpg" alt="Instagram" width="30" /> Story teilen
             </button>
           </section>
+
         </main>
       </div>
     );
